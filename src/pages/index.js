@@ -1,37 +1,50 @@
-import * as React from "react"
+import React from "react"
 import { graphql, Link } from "gatsby"
 import styled from "styled-components"
 import Layout from "../components/layout"
-import Seo from "../components/seo"
+
+const Title = styled.h1`
+  display: inline-block;
+  color: deeppink;
+`
+
+const BlogTitle = styled.h3`
+  margin-bottom: 20px;
+  color: blue;
+  &:hover {
+    color: #1dcaff;
+  }
+`
 
 const BlogLink = styled(Link)`
   text-decoration: none;
-`
-const BlogTItle = styled.h3`
-  margin-bottom: 20px;
-  color: blue;
+  color: inherit;
 `
 
-export default ({ data }) => (
-  <Layout>
-    <Seo title="Home" />
-    <div>
-      <h1>My Thoughts</h1>
-      <h4>{data.allMarkdownRemark ? data.allMarkdownRemark.totalCount : 0}</h4>
-      {data.allMarkdownRemark &&
-        data.allMarkdownRemark.edges.map(({ node }) => (
-          <div key={node.id}>
+const BlogBody = styled.div`
+  margin-bottom: 50px;
+`
+
+export default ({ data }) => {
+  return (
+    <Layout>
+      <div>
+        <Title>Thoughts by Dev</Title>
+        <h4>{data.allMarkdownRemark.totalCount} Posts</h4>
+        {data.allMarkdownRemark.edges.map(({ node }) => (
+          <BlogBody key={node.id}>
             <BlogLink to={node.fields.slug}>
-              <BlogTItle>
-                {node.frontmatter.title} - {node.frontmatter.date}
-              </BlogTItle>
+              <BlogTitle>
+                {node.frontmatter.title} <span>— {node.frontmatter.date}</span>
+              </BlogTitle>
             </BlogLink>
-            <p>{node.excerpt}</p>
-          </div>
+            <p>{node.frontmatter.description || node.excerpt}</p>
+          </BlogBody>
         ))}
-    </div>
-  </Layout>
-)
+      </div>
+    </Layout>
+  )
+}
 
 export const query = graphql`
   query {
@@ -41,17 +54,16 @@ export const query = graphql`
         node {
           id
           frontmatter {
-            description
             title
-            date
+            date(formatString: "DD MMMM, YYYY")
+            description
           }
           fields {
             slug
           }
-          html
-          excerpt
+          excerpt(truncate: true)
         }
       }
     }
   }
-`;
+`
